@@ -1,0 +1,29 @@
+
+
+version: "2"
+services:
+
+  jaeger:
+    image: jaegertracing/all-in-one:1
+    ports:
+      - "16686:16686"
+      - "14268"
+      - "14250"
+
+  otel-collector:
+    user: "${UID:-10001}:${GUID:-10001}"
+    image: otel/opentelemetry-collector:0.51.0
+    command: --config=/etc/otel-collector-config.yaml
+    volumes:
+      - type: bind
+        source: otel-collector-config.yaml
+        target: /etc/otel-collector-config.yaml
+        read_only: true
+      - type: bind
+        source: out
+        target: /out
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    depends_on:
+      - jaeger
